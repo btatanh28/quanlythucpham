@@ -1,0 +1,41 @@
+.admin-content {
+    margin-left: 250px;
+    padding: 20px;
+  
+    .card {
+      border: none;
+      border-radius: 10px;
+    }
+  
+    .table-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+  
+    .form-control {
+      border-radius: 5px;
+    }
+  
+    .btn-success, .btn-secondary, .btn-warning, .btn-danger {
+      border-radius: 5px;
+      padding: 0.5rem 1rem;
+    }
+  
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .admin-content {
+      margin-left: 200px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .admin-content {
+      margin-left: 0;
+    }
+  }

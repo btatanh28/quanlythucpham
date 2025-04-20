@@ -1,0 +1,29 @@
+.admin-content {
+    margin-left: 250px;
+    padding: 20px;
+  
+    .card {
+      border: none;
+      border-radius: 10px;
+    }
+  
+    .form-select {
+      max-width: 150px;
+    }
+  
+    .btn-danger {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .admin-content {
+      margin-left: 200px;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .admin-content {
+      margin-left: 0;
+    }
+  }

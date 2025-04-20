@@ -1,0 +1,35 @@
+.footer {
+    background-color: #28a745; 
+    color: #fff;
+    height: 100%;
+  
+    .footer-logo {
+      width: 40px;
+      height: 40px;
+      transition: transform 0.3s ease;
+    }
+  
+    h5 {
+      color: #fff;
+      font-weight: 600;
+    }
+  
+    .text-light {
+      color: rgba(255, 255, 255, 0.9) !important;
+      transition: all 0.3s ease;
+  
+      &:hover {
+        color: #fff !important;
+        text-decoration: none;
+      }
+    }
+  
+    .bi {
+      color: #fff;
+      font-size: 1.1rem;
+    }
+  
+    .border-top {
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+  }

@@ -1,0 +1,69 @@
+<!-- admin-products.component.html -->
+<div class="admin-content">
+    <div class="container-fluid">
+      <h2 class="mb-4 fw-bold text-success">Quản lý sản phẩm</h2>
+      
+      <!-- Form thêm/sửa sản phẩm -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{{ editingProduct ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h5>
+          <form (ngSubmit)="saveProduct()">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="name" class="form-label">Tên sản phẩm</label>
+                <input type="text" class="form-control" id="name" [(ngModel)]="newProduct.name" name="name" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="price" class="form-label">Giá (VND)</label>
+                <input type="number" class="form-control" id="price" [(ngModel)]="newProduct.price" name="price" min="0" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="image" class="form-label">URL hình ảnh</label>
+                <input type="text" class="form-control" id="image" [(ngModel)]="newProduct.image" name="image" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success">{{ editingProduct ? 'Cập nhật' : 'Thêm' }}</button>
+            <button type="button" class="btn btn-secondary ms-2" *ngIf="editingProduct" (click)="cancelEdit()">Hủy</button>
+          </form>
+        </div>
+      </div>
+  
+      <!-- Bảng sản phẩm -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên</th>
+                  <th>Giá</th>
+                  <th>Hình ảnh</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of products">
+                  <td>{{ product.id }}</td>
+                  <td>{{ product.name }}</td>
+                  <td>{{ product.price }}</td>
+                  <td><img [src]="product.image" alt="{{ product.name }}" class="table-img"></td>
+                  <td>
+                    <button class="btn btn-warning btn-sm me-2" (click)="editProduct(product)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" (click)="deleteProduct(product.id)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="products.length === 0">
+                  <td colspan="5" class="text-center">Chưa có sản phẩm</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
