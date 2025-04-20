@@ -1,37 +1,72 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
+// Định nghĩa interface SanPham
+export interface SanPham {
+    IDSanPham?: string;
+    IDUser?: string | null;
+    TenSanPham: string;
+    SoTonKho?: number;
+    HinhAnh?: string;
+    Gia: number;
+    MoTa?: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
-export class ProductService {
-  private products: Product[] = [
-    { id: 1, name: 'Rau Cải Xanh', price: 25000, image: 'assets/images/rau-cai-xanh.jpg' },
-    { id: 2, name: 'Cà Chua Organic', price: 35000, image: 'assets/images/ca-chua.jpg' }
-  ];
+export class SanPhamService {
+    private apiUrl = 'http://localhost:5000/api/sanpham';
 
-  getProducts(): Product[] {
-    return this.products;
-  }
+    constructor(private http: HttpClient){}
 
-  addProduct(product: Product) {
-    this.products.push(product);
-  }
-
-  updateProduct(product: Product) {
-    const index = this.products.findIndex(p => p.id === product.id);
-    if (index !== -1) {
-      this.products[index] = product;
+    // Lấy danh sách sản phẩm
+    getSanPhams(): Observable<SanPham[]> {
+        return this.http.get<SanPham[]>(this.apiUrl).pipe(
+            catchError(this.handleError)
+        );
     }
-  }
 
-  deleteProduct(id: number) {
-    this.products = this.products.filter(p => p.id !== id);
-  }
+    // Lấy sản phẩm theo ID
+    getSanPhamById(id: string): Observable<SanPham> {
+        return this.http.get<SanPham>(`${this.apiUrl}/${id}`).pipe(
+            catchError(this.handleError)
+        );
+    }
+
+    // Thêm sản phẩm
+    createSanPham(sanpham: SanPham): Observable<any> {
+        return this.http.post<any>(this.apiUrl, sanpham).pipe(
+            catchError(this.handleError)
+        );
+    }
+
+    // Sửa sản phẩm
+    updateSanPham(id: string, sanpham: SanPham): Observable<any> {
+        return this.http.put<any>(`${this.apiUrl}/${id}`, sanpham).pipe(
+            catchError(this.handleError)
+        );
+    }
+
+    // Xóa sản phẩm
+    deleteSanPham(id: string): Observable<any> {
+        return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
+            catchError(this.handleError)
+        );
+    }
+
+    // Xử lý lỗi
+    private handleError(error: HttpErrorResponse) {
+        let errorMessage = 'Đã xảy ra lỗi!';
+        if (error.error instanceof ErrorEvent) {
+            // Lỗi phía client
+            errorMessage = error.error.message;
+        } else {
+            // Lỗi phía server
+            errorMessage = error.error.message || `Mã lỗi: ${error.status}, thông báo: ${error.message}`;
+        }
+        return throwError(() => new Error(errorMessage));
+    }
 }

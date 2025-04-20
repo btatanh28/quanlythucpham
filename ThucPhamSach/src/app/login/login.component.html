@@ -1,0 +1,18 @@
+<div class="auth-modal" [ngClass]="{'scrolled': isScrolled}">
+    <div class="auth-content">
+        <!-- <button class="close-btn" (click)="closeModal()"> 
+        <i class="fas fa-times"></i>
+        </button>  -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'login'" (click)="setActiveTab('login')">Đăng nhập</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" [class.active]="activeTab === 'register'" (click)="setActiveTab('register')">Đăng ký</a>
+            </li>
+        </ul>
+
+        <app-loginUser *ngIf="activeTab === 'login'" />
+        <app-register *ngIf="activeTab === 'register'" />
+    </div>
+</div>

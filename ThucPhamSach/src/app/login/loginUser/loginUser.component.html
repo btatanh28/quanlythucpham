@@ -1,0 +1,17 @@
+<div class="container">
+    <!-- Login Form -->
+    <form (ngSubmit)="onLoginSubmit()" class="animate__animated animate__slideInLeft">
+        <div class="mb-3">
+          <label for="loginEmail" class="form-label">Email</label>
+          <input type="email" class="form-control" id="loginEmail" [(ngModel)]="loginForm.Email" name="Email" required>
+        </div>
+        <div class="mb-3">
+          <label for="loginPassword" class="form-label">Mật khẩu</label>
+          <input type="password" class="form-control" id="loginPassword" [(ngModel)]="loginForm.MatKhau" name="MatKhau" required>
+        </div>
+        <div class="mb-3 text-end">
+          <a href="#" class="text-light">Quên mật khẩu?</a>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+      </form>
+</div>

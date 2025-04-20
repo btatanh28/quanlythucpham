@@ -1,4 +1,31 @@
 <div class="container">
-    <app-admin-products />
-    <app-admin-orders />
-</div>
+    <div class="bg">
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <button class="nav-link" 
+                  (click)="selectTab('products')" 
+                  [class.active]="activeTab === 'products'">
+            Products
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" 
+                  (click)="selectTab('orders')" 
+                  [class.active]="activeTab === 'orders'">
+            Orders
+          </button>
+        </li>
+      </ul>
+  
+      <!-- Tab Content -->
+      <div *ngIf="activeTab === 'products'">
+        <app-admin-products></app-admin-products>
+      </div>
+  
+      <div *ngIf="activeTab === 'orders'">
+        <app-admin-orders></app-admin-orders>
+      </div>
+    </div>
+  </div>
+  

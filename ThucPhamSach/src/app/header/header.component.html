@@ -1,10 +1,10 @@
 <!-- header.component.html -->
 <header class="header fixed-top bg-white shadow-sm">
   <nav class="navbar navbar-expand-lg navbar-light">
-    <div class="container-fluid">
+    <div class="container">
       <!-- Logo -->
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="assets/logo.png" alt="Organic Food Logo" class="logo-img me-2">
+        <img src="assets/Fresh food.png" alt="Organic Food Logo" class="logo-img me-2">
         <span class="fw-bold text-success">Organic Food</span>
       </a>
 
@@ -27,7 +27,7 @@
             <a class="nav-link" [routerLink]="['/cart']" >Giỏ hàng</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" routerLink="/users">Đăng nhập</a>
+            <a class="nav-link" [routerLink]="['/login']">Đăng nhập</a>
           </li>
           <li class="nav-item">
             <a class="nav-link btn btn-success text-white ms-3" href="#" routerLink="/logout">Đăng xuất</a>
