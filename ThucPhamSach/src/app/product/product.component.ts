@@ -1,31 +1,37 @@
+// src/app/product.component.ts
 import { Component, OnInit } from '@angular/core';
 import { SanPhamService, SanPham } from '../services/productService';
+import { CartComponent } from '../cart/cart.component';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CartService } from '../services/cartService';
 
 @Component({
   selector: 'app-products',
+  standalone: true,
   imports: [NgFor, FormsModule, CommonModule],
   templateUrl: './product.component.html',
-  styleUrl: './product.component.css'
+  styleUrls: ['./product.component.css']
 })
 export class ProductComponent implements OnInit {
-  products: SanPham[] = []; 
-  filteredProducts: SanPham[] = []; 
-  searchQuery: string = ''; 
+  products: SanPham[] = [];
+  filteredProducts: SanPham[] = [];
+  searchQuery: string = '';
 
-  constructor(private sanPhamService: SanPhamService) {}
+  constructor(
+    private sanPhamService: SanPhamService,
+    private cartService: CartService,
+  ) {}
 
   ngOnInit(): void {
-    this.loadProducts(); 
+    this.loadProducts();
   }
 
-  // Tải tất cả sản phẩm từ API
   loadProducts(): void {
     this.sanPhamService.getSanPhams().subscribe({
       next: (data: SanPham[]) => {
         this.products = data;
-        this.filteredProducts = data; 
+        this.filteredProducts = data;
       },
       error: (error) => {
         console.error('Lỗi khi lấy sản phẩm:', error);
@@ -41,12 +47,11 @@ export class ProductComponent implements OnInit {
         product.TenSanPham.toLowerCase().includes(query)
       );
     } else {
-      this.filteredProducts = this.products; 
+      this.filteredProducts = this.products;
     }
   }
 
   addToCart(product: SanPham): void {
-    console.log(`Đã thêm ${product.TenSanPham} vào giỏ hàng`);
-    alert(`${product.TenSanPham} đã được thêm vào giỏ hàng!`);
+    this.cartService.addToCart(product);
   }
 }

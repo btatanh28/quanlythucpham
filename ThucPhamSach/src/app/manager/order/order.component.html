@@ -1,53 +1,54 @@
-<!-- admin-orders.component.html -->
 <div class="admin-content">
-    <div class="container-fluid">
-      <h2 class="mb-4 fw-bold text-success">Quản lý đơn hàng</h2>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Khách hàng</th>
-                  <th>Sản phẩm</th>
-                  <th>Tổng tiền</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of orders">
-                  <td>{{ order.id }}</td>
-                  <td>{{ order.customer }}</td>
-                  <td>
-                    <ul class="mb-0">
-                      <li *ngFor="let item of order.items">{{ item.product.name }} (x{{ item.quantity }})</li>
-                    </ul>
-                  </td>
-                  <td>{{ order.total }}</td>
-                  <td>
-                    <select class="form-select" [(ngModel)]="order.status" (change)="updateOrderStatus(order)">
-                      <option value="Pending">Đang xử lý</option>
-                      <option value="Confirmed">Đã xác nhận</option>
-                      <option value="Shipped">Đang giao</option>
-                      <option value="Delivered">Đã giao</option>
-                      <option value="Cancelled">Đã hủy</option>
-                    </select>
-                  </td>
-                  <td>
-                    <button class="btn btn-danger btn-sm" (click)="deleteOrder(order.id)">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="orders.length === 0">
-                  <td colspan="6" class="text-center">Chưa có đơn hàng</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  <div class="container-fluid">
+    <h2 class="mb-4 fw-bold text-success">Quản lý đơn hàng</h2>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Khách hàng</th>
+                <th>Sản phẩm</th>
+                <th>Số điện thoại</th>
+                <th>Địa chỉ</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders">
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer }}</td>
+                <td>
+                  <ul class="mb-0">
+                    <li *ngFor="let item of order.items">
+                      {{ item.product.name }} (x{{ item.quantity }})
+                    </li>
+                  </ul>
+                </td>
+                <td>{{ order.total }}</td>
+                <td>
+                  <select class="form-select" [(ngModel)]="order.status" (change)="updateOrderStatus(order)">
+                    <option value="Đang xử lý">Đang xử lý</option>
+                    <option value="Hết hàng">Hết hàng</option>
+                    <option value="Đã giao">Xác nhận</option>
+                  </select>
+                </td>
+                <td>
+                  <button class="btn btn-danger btn-sm" (click)="deleteOrder(order.id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="orders.length === 0">
+                <td colspan="6" class="text-center">Chưa có đơn hàng</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
+</div>

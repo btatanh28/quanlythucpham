@@ -121,6 +121,11 @@ exports.login = async (req, res) => {
         res.status(200).json({
             message: 'Đăng nhập thành công',
             token,
+            IDUser: userType === 'User' ? user.IDUser : undefined,
+            IDKhachHang: userType === 'KhachHang' ? user.IDKhachHang : undefined,
+            Email: user.Email,
+            TenNguoiDung: userType === 'User' ? user.TenNguoiDung : undefined,
+            TenKhachHang: userType === 'KhachHang' ? user.TenKhachHang : undefined,
             userType: userType,
             role: userType === 'User' ? user.VaiTro : 'Khách Hàng'
         });

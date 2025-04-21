@@ -1,49 +1,121 @@
-import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CartService } from '../services/cartService';
+import { SanPham } from '../services/productService';
+import { OrderService } from '../services/orderService';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
+import { AuthService } from '../services/authService';
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cart',
-  imports: [FormsModule, NgFor, NgIf],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.component.html',
-  styleUrl: './cart.component.css'
+  styleUrls: ['./cart.component.css']
 })
-export class CartComponent implements OnInit {
-  cartItems: CartItem[] = [
-    // Dữ liệu mẫu, có thể thay bằng dữ liệu từ service
-    { product: { id: 1, name: 'Bánh Mỳ', price: 25000, image: 'assets/banhmi.jpg' }, quantity: 2 },
-    { product: { id: 2, name: 'Bún bò Huế', price: 35000, image: 'assets/bunbohue.jpg' }, quantity: 1 }
-  ];
+export class CartComponent implements OnInit, OnDestroy {
+  cartItems: { product: SanPham; quantity: number }[] = [];
+  isModalOpen: boolean = false;
+  tenKhachHang: string | null = null;
+  selectedPaymentMethod: string = 'cash'; // Mặc định là thanh toán khi nhận hàng
 
-  ngOnInit() {}
+  private currentUserSubscription!: Subscription;
 
-  updateQuantity(item: CartItem) {
-    if (item.quantity < 1) {
-      item.quantity = 1; 
+  constructor(
+    private cartService: CartService,
+    private orderService: OrderService,
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.cartService.cartItems$.subscribe(items => {
+      this.cartItems = items;
+    });
+  }
+
+  ngOnInit(): void {
+    // Lấy TenKhachHang ngay khi khởi tạo
+    this.tenKhachHang = this.authService.getUserCurrent();
+
+    // Lắng nghe sự thay đổi của currentUser$
+    this.currentUserSubscription = this.authService.currentUser$.subscribe(user => {
+      this.tenKhachHang = user ? user.TenKhachHang : null;
+      console.log('TenKhachHang updated:', this.tenKhachHang);
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Hủy subscription để tránh rò rỉ bộ nhớ
+    if (this.currentUserSubscription) {
+      this.currentUserSubscription.unsubscribe();
     }
   }
 
-  removeFromCart(item: CartItem) {
-    this.cartItems = this.cartItems.filter(i => i !== item);
+  updateQuantity(item: { product: SanPham; quantity: number }): void {
+    this.cartService.updateQuantity(item.product.IDSanPham!, item.quantity);
+  }
+
+  removeFromCart(item: { product: SanPham; quantity: number }): void {
+    this.cartService.removeFromCart(item.product.IDSanPham!);
   }
 
   getTotalPrice(): number {
-    return this.cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return this.cartService.getTotalPrice();
   }
 
-  checkout() {
-    alert('Chuyển đến trang thanh toán!'); 
+  openCheckoutModal(): void {
+    if (!this.tenKhachHang) {
+      alert('Bạn cần đăng nhập trước khi thanh toán!');
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.isModalOpen = true;
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+  }
+
+  confirmCheckout(): void {
+    if (!this.tenKhachHang) {
+      alert('Bạn cần đăng nhập trước khi đặt hàng!');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const chiTiet = this.cartItems
+      .filter(item => item.product.IDSanPham)
+      .map(item => ({
+        IDSanPham: item.product.IDSanPham as string,
+        Quantity: item.quantity,
+        Gia: item.product.Gia
+      }));
+
+    const donHang = {
+      TenKhachHang: this.tenKhachHang,
+      chiTiet
+    };
+
+    this.orderService.createOrder(donHang).subscribe({
+      next: (res) => {
+        console.log('Đơn hàng đã tạo:', res);
+        this.orderService.getOrderById(res.IDDonHang).subscribe({
+          next: (orderDetail) => {
+            console.log('Chi tiết đơn hàng:', orderDetail);
+            alert('Đặt hàng thành công!\nMã đơn hàng: ' + res.IDDonHang);
+            this.cartService.clearCart();
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Lỗi khi lấy chi tiết đơn hàng', err);
+            alert('Lỗi khi lấy chi tiết đơn hàng!');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Lỗi khi đặt hàng', err);
+        alert('Lỗi khi đặt hàng!');
+      }
+    });
   }
 }

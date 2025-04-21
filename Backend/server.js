@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const sanphamRoutes = require('./routes/sanphamRoutes');
+const donhangRoutes = require('./routes/donhangRoutes');
 
 
 const app = express();
@@ -30,6 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/sanpham', sanphamRoutes);
+app.use('/api/donhang', donhangRoutes);
+
 
 
 // Middleware xử lý lỗi

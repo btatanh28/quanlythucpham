@@ -1,5 +1,20 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
+export interface ChiTietDonHang {
+  IDSanPham: string;
+  Quantity: number;
+  Gia: number;
+}
+
+export interface DonHang {
+  TenKhachHang: string;
+  chiTiet: ChiTietDonHang[];
+  TrangThaiSanPham?: string;
+}
+
+// Cập nhật interface Order để phù hợp với TenKhachHang
 interface CartItem {
   product: { id: number; name: string; price: number; image: string };
   quantity: number;
@@ -7,7 +22,7 @@ interface CartItem {
 
 interface Order {
   id: number;
-  customer: string;
+  customer: string; // Đảm bảo customer là TenKhachHang (kiểu string)
   items: CartItem[];
   total: number;
   status: string;
@@ -17,34 +32,27 @@ interface Order {
   providedIn: 'root'
 })
 export class OrderService {
-  private orders: Order[] = [
-    {
-      id: 1,
-      customer: 'Nguyễn Văn A',
-      items: [
-        { product: { id: 1, name: 'Rau Cải Xanh', price: 25000, image: 'assets/images/rau-cai-xanh.jpg' }, quantity: 2 }
-      ],
-      total: 50000,
-      status: 'Pending'
-    }
-  ];
+  private apiUrl = 'http://localhost:5000/api/donhang';
 
-  getOrders(): Order[] {
-    return this.orders;
+  constructor(private http: HttpClient) {}
+
+  createOrder(orderData: DonHang): Observable<any> {
+    return this.http.post<any>(this.apiUrl, orderData);
   }
 
-  updateOrder(order: Order) {
-    const index = this.orders.findIndex(o => o.id === order.id);
-    if (index !== -1) {
-      this.orders[index] = order;
-    }
+  getOrderById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  deleteOrder(id: number) {
-    this.orders = this.orders.filter(o => o.id !== id);
+  getOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(this.apiUrl);
   }
 
-  addOrder(order: Order) {
-    this.orders.push(order);
+  updateTrangThai(id: number, data: { TrangThaiSanPham: string }): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/trangthai`, data);
+  }
+
+  deleteOrder(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }

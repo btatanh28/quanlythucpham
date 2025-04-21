@@ -1,25 +1,33 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
-import { FormsModule } from '@angular/forms'
-import { RouterModule } from '@angular/router';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/authService';
-import { Router } from '@angular/router'; // Thêm import Router
-
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   isScrolled = false;
-  searchQuery: string = '';
+  currentUser: any = null;
+  
 
-  constructor (private authService: AuthService,
-    private router: Router
-  ){}
+  constructor(private authService: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    console.log('Is logged in:', this.authService.isLoggedIn());
+    this.currentUser = this.authService.getUserCurrent();
+    console.log('Initial currentUser:', this.currentUser);
+
+    this.authService.currentUser$.subscribe(user => {
+      console.log('CurrentUser$ emitted:', user);
+      this.currentUser = user;
+    });
+  }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
@@ -44,8 +52,9 @@ export class HeaderComponent {
   onMenuItemLeave(item: string) {
     this.menuItemStates[item] = 'normal';
   }
-  logOut(){
+
+  logOut() {
     this.authService.logOut();
-    this.router.navigate(['/login']); 
+    this.router.navigate(['/login']);
   }
 }

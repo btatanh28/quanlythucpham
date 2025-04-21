@@ -26,11 +26,15 @@
           <li class="nav-item">
             <a class="nav-link" [routerLink]="['/cart']" >Giỏ hàng</a>
           </li>
-          <li class="nav-item">
+          <!-- Đăng nhập hoặc tên người dùng -->
+          <li class="nav-item" *ngIf="!currentUser">
             <a class="nav-link" [routerLink]="['/login']">Đăng nhập</a>
           </li>
-          <li class="nav-item">
-            <button (click)="logOut()" class="btn btn-success text-white ms-3">Đăng xuất</button>
+          <li class="nav-item" *ngIf="currentUser">
+            <a class="nav-link" [routerLink]="['/profile']">{{ currentUser?.TenKhachHang || 'Khách' }}</a>
+          </li>
+          <li class="nav-item" *ngIf="currentUser">
+            <button class="btn btn-success text-white ms-3" (click)="logOut()">Đăng xuất</button>
           </li>
         </ul>
       </div>
