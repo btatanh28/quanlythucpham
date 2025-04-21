@@ -1,49 +1,52 @@
-import { NgFor } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms'
-
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-}
+import { SanPhamService, SanPham } from '../services/productService';
+import { CommonModule, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-products',
-  imports: [NgFor, FormsModule],
+  imports: [NgFor, FormsModule, CommonModule],
   templateUrl: './product.component.html',
   styleUrl: './product.component.css'
 })
 export class ProductComponent implements OnInit {
-  products: Product[] = [
-    { id: 1, name: 'Bánh Mỳ', price: 25000, image: 'assets/banhmi.jpg' },
-    { id: 2, name: 'Bún bò Huế', price: 35000, image: 'assets/bunbohue.jpg' },
-    { id: 3, name: 'Bún chả', price: 60000, image: 'assets/buncha.jpg' },
-    { id: 4, name: 'Chả giò', price: 20000, image: 'assets/chagio.jpg' },
-    { id: 5, name: 'Cơm gà', price: 30000, image: 'assets/comga.jpg' },
-    { id: 6, name: 'Cơm tấm', price: 22000, image: 'assets/comtam.jpg' }
-  ];
-  searchQuery: string = '';
-  filteredProducts: Product[] = [];
+  products: SanPham[] = []; 
+  filteredProducts: SanPham[] = []; 
+  searchQuery: string = ''; 
 
-  ngOnInit() {
-    this.filteredProducts = [...this.products]; // Hiển thị tất cả ban đầu
+  constructor(private sanPhamService: SanPhamService) {}
+
+  ngOnInit(): void {
+    this.loadProducts(); 
   }
 
-  onSearch() {
-    const query = this.searchQuery.trim().toLowerCase();
-    if (!query) {
-      this.filteredProducts = [...this.products];
-    } else {
+  // Tải tất cả sản phẩm từ API
+  loadProducts(): void {
+    this.sanPhamService.getSanPhams().subscribe({
+      next: (data: SanPham[]) => {
+        this.products = data;
+        this.filteredProducts = data; 
+      },
+      error: (error) => {
+        console.error('Lỗi khi lấy sản phẩm:', error);
+        alert('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
+      }
+    });
+  }
+
+  onSearch(): void {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (query) {
       this.filteredProducts = this.products.filter(product =>
-        product.name.toLowerCase().includes(query)
+        product.TenSanPham.toLowerCase().includes(query)
       );
+    } else {
+      this.filteredProducts = this.products; 
     }
   }
 
-  addToCart(product: Product) {
-    alert(`${product.name} đã được thêm!`); 
+  addToCart(product: SanPham): void {
+    console.log(`Đã thêm ${product.TenSanPham} vào giỏ hàng`);
+    alert(`${product.TenSanPham} đã được thêm vào giỏ hàng!`);
   }
 }
