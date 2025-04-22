@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/authService';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { SanPhamService } from '../services/productService';
 
 @Component({
   selector: 'app-cart',
@@ -19,11 +20,14 @@ export class CartComponent implements OnInit, OnDestroy {
   isModalOpen: boolean = false;
   tenKhachHang: string | null = null;
   selectedPaymentMethod: string = 'cash'; // Mặc định là thanh toán khi nhận hàng
+  sanPhamHopLe: { product: SanPham; quantity: number }[] = [];
+  daKiemTraTonKho: boolean = false;
 
   private currentUserSubscription!: Subscription;
 
   constructor(
     private cartService: CartService,
+    private sanPhamService: SanPhamService,
     private orderService: OrderService,
     private authService: AuthService,
     private router: Router
@@ -76,46 +80,75 @@ export class CartComponent implements OnInit, OnDestroy {
     this.isModalOpen = false;
   }
 
-  confirmCheckout(): void {
+  handleCheckout(cartItems: { product: SanPham; quantity: number }[]): void {
     if (!this.tenKhachHang) {
       alert('Bạn cần đăng nhập trước khi đặt hàng!');
       this.router.navigate(['/login']);
       return;
     }
-
-    const chiTiet = this.cartItems
-      .filter(item => item.product.IDSanPham)
-      .map(item => ({
-        IDSanPham: item.product.IDSanPham as string,
+  
+    if (!this.daKiemTraTonKho) {
+      // Bước 1: Kiểm tra tồn kho
+      this.sanPhamHopLe = [];
+      let soLuongDaKiemTra = 0;
+  
+      for (let item of cartItems) {
+        if (!item.product.IDSanPham) continue;
+  
+        this.sanPhamService.kiemTraTonKho(item.product.IDSanPham).subscribe({
+          next: (tonKho) => {
+            soLuongDaKiemTra++;
+            if (tonKho === 0) {
+              alert(`Sản phẩm "${item.product.TenSanPham}" đã hết hàng!`);
+            } else {
+              this.sanPhamHopLe.push(item);
+            }
+  
+            if (soLuongDaKiemTra === cartItems.length) {
+              if (this.sanPhamHopLe.length > 0) {
+                this.daKiemTraTonKho = true;
+                alert('Sản phẩm còn hàng! Bấm lại nút để xác nhận đặt hàng.');
+              } else {
+                alert('Tất cả sản phẩm đều đã hết hàng.');
+              }
+            }
+          },
+          error: () => {
+            soLuongDaKiemTra++;
+            alert('Lỗi kiểm tra tồn kho!');
+          }
+        });
+      }
+    } else {
+      // Bước 2: Tạo đơn hàng duy nhất cho tất cả sản phẩm hợp lệ
+      const chiTiet = this.sanPhamHopLe.map(item => ({
+        IDSanPham: item.product.IDSanPham!,
         Quantity: item.quantity,
         Gia: item.product.Gia
       }));
+  
+      const donHang = {
+        TenKhachHang: this.tenKhachHang!,
+        chiTiet,
+        HinhThucThanhToan: this.selectedPaymentMethod === 'cash' ? 'Thanh toán khi nhận hàng' : 'Thanh toán chuyển khoản' // Chuyển đổi phương thức thanh toán
+      };
+  
+      this.orderService.createOrder(donHang).subscribe({
+        next: (res) => {
+          console.log('Đơn hàng đã được tạo:', res);
 
-    const donHang = {
-      TenKhachHang: this.tenKhachHang,
-      chiTiet
-    };
-
-    this.orderService.createOrder(donHang).subscribe({
-      next: (res) => {
-        console.log('Đơn hàng đã tạo:', res);
-        this.orderService.getOrderById(res.IDDonHang).subscribe({
-          next: (orderDetail) => {
-            console.log('Chi tiết đơn hàng:', orderDetail);
-            alert('Đặt hàng thành công!\nMã đơn hàng: ' + res.IDDonHang);
-            this.cartService.clearCart();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Lỗi khi lấy chi tiết đơn hàng', err);
-            alert('Lỗi khi lấy chi tiết đơn hàng!');
-          }
-        });
-      },
-      error: (err) => {
-        console.error('Lỗi khi đặt hàng', err);
-        alert('Lỗi khi đặt hàng!');
-      }
-    });
+          alert(`✅ Đặt hàng thành công!\nMã đơn: ${res.IDDonHang}`);
+          this.cartService.clearCart();
+        },
+        error: () => {
+          alert('❌ Lỗi khi đặt hàng!');
+        }
+      });
+  
+      // Reset lại trạng thái
+      this.daKiemTraTonKho = false;
+      this.sanPhamHopLe = [];
+    }
   }
+  
 }

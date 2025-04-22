@@ -11,8 +11,11 @@ interface CartItem {
 interface Order {
   id: number;
   customer: string;
+  address: string;
+  phone: string;
   items: CartItem[];
   total: number;
+  paymentMethod: string;
   status: string;
 }
 
@@ -28,15 +31,17 @@ export class AdminOrdersComponent implements OnInit {
   constructor(private orderService: OrderService) {}
 
   ngOnInit(): void {
-    // Sửa lỗi typo ở đây
     this.orderService.getOrders().subscribe({
       next: (orders) => {
-        // Chuyển đổi dữ liệu từ API về đúng dạng để hiển thị
+        // Kiểm tra dữ liệu nhận được từ API
         this.orders = orders.map(order => ({
           id: order.id,
           customer: order.customer,
+          address: order.address,
+          phone: order.phone,
           total: order.total,
           status: order.status,
+          paymentMethod: order.paymentMethod,  // Kiểm tra phương thức thanh toán
           items: order.items || [] // Đảm bảo luôn có mảng items
         }));
       },
@@ -48,24 +53,28 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   updateOrderStatus(order: Order): void {
-    this.orderService.updateTrangThai(order.id, { TrangThaiSanPham: order.status }).subscribe({
-      next: (res) => {
-        alert(`Cập nhật trạng thái thành công`)
-        // console.log('Cập nhật trạng thái thành công:', res);
-      },
-      error: (err) => {
-        console.error('Lỗi khi cập nhật trạng thái', err);
-        alert('Lỗi khi cập nhật trạng thái!');
-      }
-    });
+    // Kiểm tra nếu trạng thái thực sự thay đổi mới cập nhật
+    if (order.status) {
+      this.orderService.updateTrangThai(order.id, { TrangThaiSanPham: order.status }).subscribe({
+        next: (res) => {
+          alert('Cập nhật trạng thái thành công');
+        },
+        error: (err) => {
+          console.error('Lỗi khi cập nhật trạng thái', err);
+          alert('Lỗi khi cập nhật trạng thái!');
+        }
+      });
+    }
   }
 
   deleteOrder(id: number): void {
-    if (confirm('Bạn có chắc muốn xóa đơn hàng này?')) {
+    // Hiển thị thông báo xác nhận xóa đơn hàng
+    const confirmation = window.confirm('Bạn có chắc muốn xóa đơn hàng này?');
+    if (confirmation) {
       this.orderService.deleteOrder(id).subscribe({
         next: (res) => {
           console.log('Xóa đơn hàng thành công:', res);
-          this.orders = this.orders.filter(order => order.id !== id); // Cập nhật lại danh sách sau khi xóa
+          this.orders = this.orders.filter(order => order.id !== id); // Cập nhật lại danh sách
         },
         error: (err) => {
           console.error('Lỗi khi xóa đơn hàng', err);

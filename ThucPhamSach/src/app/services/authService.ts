@@ -109,6 +109,12 @@ export class AuthService {
     return false;
   }
 
+
+  getCustomerId(): number | null {
+    const customerId = localStorage.getItem('customerId');
+    return customerId ? Number(customerId) : null;
+  }
+
   getUserId(): number | null {
     // Lấy userID từ BehaviorSubject thay vì từ localStorage trực tiếp
     const currentUser = this.currentUserSubject.value;
@@ -138,9 +144,11 @@ export class AuthService {
 
   logOut(): void {
     if (this.isBrowser) {
-      localStorage.removeItem('Token');
-      localStorage.removeItem('Current');
-      localStorage.removeItem('cartItems');
+      // localStorage.removeItem('Token');
+      // localStorage.removeItem('Current');
+      // localStorage.removeItem('cartItems');
+      localStorage.clear();
+
     }
     this.currentUserSubject.next(null);
   }

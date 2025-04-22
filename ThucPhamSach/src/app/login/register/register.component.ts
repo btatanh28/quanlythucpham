@@ -9,15 +9,14 @@ import { HttpClientModule } from "@angular/common/http";
     selector: "app-register",
     imports: [CommonModule, FormsModule, HttpClientModule],
     templateUrl: './register.component.html',
-    styleUrl: './register.component.css'
+    styleUrls: ['./register.component.css']
 })
-
-export class RegisterComponent{
+export class RegisterComponent {
     registerForm = { TenKhachHang: '', Email: '', MatKhau: '', SoDienThoai: '', DiaChi: '', ConfirmPassword: '' };
 
-    constructor(private authService: AuthService, private router: Router){}
+    constructor(private authService: AuthService, private router: Router) {}
 
-    onRegisterSubmit(){
+    onRegisterSubmit() {
         const user = {
             Email: this.registerForm.Email, 
             TenKhachHang: this.registerForm.TenKhachHang, 
@@ -25,19 +24,35 @@ export class RegisterComponent{
             SoDienThoai: this.registerForm.SoDienThoai, 
             DiaChi: this.registerForm.DiaChi 
         }
-        
+
         console.log('Dữ liệu gửi đi:', user);
 
         this.authService.registerClient(user).subscribe({
             next: (response) => {
                 alert("Đăng ký tài khoản thành công");
 
-                this.router.navigate(['/home']);
+                // Sau khi đăng ký thành công, gọi đăng nhập với thông tin vừa tạo
+                const loginData = {
+                    Email: this.registerForm.Email, 
+                    MatKhau: this.registerForm.MatKhau
+                };
+
+                this.authService.login(loginData).subscribe({
+                    next: (loginResponse) => {
+                        console.log('Đăng nhập thành công:', loginResponse);
+                        // Chuyển hướng tới trang sản phẩm sau khi đăng nhập thành công
+                        this.router.navigate(['/product']);
+                    },
+                    error: (err) => {
+                        console.error('Lỗi đăng nhập:', err);
+                        alert('Đăng nhập thất bại: ' + (err.error?.message || 'Có lỗi xảy ra, vui lòng thử lại'));
+                    }
+                });
             },
-            error(err){
-                console.error('Lỗi:', err);
+            error(err) {
+                console.error('Lỗi đăng ký:', err);
                 alert('Đăng ký thất bại: ' + (err.error?.message || 'Có lỗi xảy ra, vui lòng thử lại')); 
             }
-        })
+        });
     }
 }

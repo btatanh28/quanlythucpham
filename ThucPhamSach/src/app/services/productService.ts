@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 // Định nghĩa interface SanPham
 export interface SanPham {
@@ -12,6 +12,7 @@ export interface SanPham {
     HinhAnh?: string;
     Gia: number;
     MoTa?: string;
+    TrangThai?: string;
 }
 
 @Injectable({
@@ -55,6 +56,11 @@ export class SanPhamService {
         return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
             catchError(this.handleError)
         );
+    }
+
+    kiemTraTonKho(id: string): Observable<number> {
+        return this.http.get<{ SoTonKho: number }>(`${this.apiUrl}/sanpham/${id}/tontonkho`)
+          .pipe(map(res => res.SoTonKho));
     }
 
     // Xử lý lỗi

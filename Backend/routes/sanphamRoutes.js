@@ -8,5 +8,7 @@ router.get('/:id', sanphamController.getSanPhamById);
 router.post('/', sanphamController.createSanPham);
 router.put('/:id', sanphamController.updateSanPham);
 router.delete('/:id', sanphamController.deleteSanPham);
+router.get('/sanpham/:id/tontonkho', sanphamController.kiemTraTonKho);
+
 
 module.exports = router;

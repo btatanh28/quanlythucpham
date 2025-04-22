@@ -93,3 +93,17 @@ exports.deleteSanPham = async (req, res) => {
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };
+
+exports.kiemTraTonKho = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await db.execute('SELECT SoTonKho FROM SanPham WHERE IDSanPham = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+        }
+        res.json({ SoTonKho: rows[0].SoTonKho });
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra tồn kho:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+};

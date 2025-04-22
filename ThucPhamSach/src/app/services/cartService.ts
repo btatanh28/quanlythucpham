@@ -14,7 +14,7 @@ export class CartService {
 
   constructor(private authService: AuthService) {
     // Tải giỏ hàng ban đầu
-    this.loadCart();
+    // this.loadCart();
 
     // Lắng nghe sự thay đổi người dùng
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
@@ -67,14 +67,20 @@ export class CartService {
   }
 
   loadCart(): void {
-    const cartKey = this.getCartKey();
-    const savedCart = localStorage.getItem(cartKey);
-    if (savedCart) {
-      this.cartItems = JSON.parse(savedCart);
+    if (typeof window !== 'undefined' && window.localStorage) {  
+      const cartKey = this.getCartKey();
+      const savedCart = localStorage.getItem(cartKey);
+      if (savedCart) {
+        this.cartItems = JSON.parse(savedCart);
+      } else {
+        this.cartItems = [];
+      }
+      this.cartItemsSubject.next(this.cartItems);
     } else {
-      this.cartItems = [];
+      console.error('localStorage is not available in this environment');
+      this.cartItems = []; 
+      this.cartItemsSubject.next(this.cartItems);
     }
-    this.cartItemsSubject.next(this.cartItems);
   }
 
   private updateCart(): void {

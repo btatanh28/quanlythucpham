@@ -14,6 +14,7 @@
                 <th>Địa chỉ</th>
                 <th>Tổng tiền</th>
                 <th>Trạng thái</th>
+                <th>Phương thức Thanh toán</th>
                 <th>Hành động</th>
               </tr>
             </thead>
@@ -28,6 +29,8 @@
                     </li>
                   </ul>
                 </td>
+                <td>{{ order.phone }}</td>
+                <td>{{ order.address }}</td>
                 <td>{{ order.total }}</td>
                 <td>
                   <select class="form-select" [(ngModel)]="order.status" (change)="updateOrderStatus(order)">
@@ -36,6 +39,7 @@
                     <option value="Đã giao">Xác nhận</option>
                   </select>
                 </td>
+                <td>{{ order.paymentMethod }}</td> <!-- Hiển thị phương thức thanh toán -->
                 <td>
                   <button class="btn btn-danger btn-sm" (click)="deleteOrder(order.id)">
                     <i class="fas fa-trash"></i>
@@ -43,7 +47,7 @@
                 </td>
               </tr>
               <tr *ngIf="orders.length === 0">
-                <td colspan="6" class="text-center">Chưa có đơn hàng</td>
+                <td colspan="9" class="text-center">Chưa có đơn hàng</td>
               </tr>
             </tbody>
           </table>

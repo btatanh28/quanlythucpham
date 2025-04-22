@@ -1,0 +1,33 @@
+.bg-notifi{
+  background-color: #f9f9f9;
+}
+
+.bg{
+  padding: 200px 100px 150px 100px;
+}
+
+.admin-content .card {
+  border: none;
+  border-radius: 10px;
+}
+
+.admin-content .form-select {
+  max-width: 150px;
+}
+
+.admin-content .btn-danger {
+  padding: 0.25rem 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .admin-content {
+    margin-left: 200px;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-content {
+    margin-left: 0;
+  }
+}

@@ -6,7 +6,7 @@
         <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
           <div class="d-flex align-items-center mb-3">
             <img src="assets/Fresh food.png" alt="Organic Food Logo" class="footer-logo me-2">
-            <h4 class="fw-bold">Organic Food</h4>
+            <h2 class="fw-bold">Organic Food</h2>
           </div>
           <p class="text-light">
             Cung cấp thực phẩm sạch, an toàn và bền vững. Chúng tôi cam kết mang đến chất lượng tốt nhất cho khách hàng.
@@ -18,16 +18,16 @@
           <h5 class="fw-bold mb-3">Liên kết nhanh</h5>
           <ul class="list-unstyled">
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none" routerLink="/dashboard">Dashboard</a>
+              <a class="nav-link" [routerLink]="['/manager']">Bảng điều khiển</a>
             </li>
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none" routerLink="/products">Products</a>
+              <a class="nav-link" [routerLink]="['/product']">Sản phẩm</a>
             </li>
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none" routerLink="/orders">Orders</a>
+              <a class="nav-link" [routerLink]="['/cart']">Giỏ hàng</a>
             </li>
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none" routerLink="/users">Users</a>
+              <a class="nav-link" [routerLink]="['/notification']">Thông báo</a>
             </li>
           </ul>
         </div>
@@ -37,7 +37,7 @@
           <h5 class="fw-bold mb-3">Liên hệ</h5>
           <ul class="list-unstyled">
             <li class="mb-2">
-              <i class="bi bi-geo-alt-fill me-2"></i> 123 Đường Sạch, TP. HCM, Việt Nam
+              <i class="bi bi-geo-alt-fill me-2"></i> Lê Văn Lương - Thanh Xuân - Hà Nội
             </li>
             <li class="mb-2">
               <i class="bi bi-telephone-fill me-2"></i> (+84) 123 456 789

@@ -1,0 +1,55 @@
+<div class="bg-notifi">
+  <div class="container mt-4 bg">
+    <h2 class="mb-4">Danh sách đơn hàng</h2>
+  
+    <div *ngIf="isLoading" class="text-center">
+      <div class="spinner-border text-primary" role="status"></div>
+      <div>Đang tải...</div>
+    </div>
+  
+    <div *ngIf="!isLoading && orders.length === 0" class="alert alert-info">
+      Không có đơn hàng nào.
+    </div>
+  
+    <div class="list-group mb-4">
+      <a 
+        *ngFor="let order of orders" 
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+        (click)="viewOrderDetail(order.id)">
+        <div>
+          <strong>{{ order.customer }}</strong> - {{ order.status }}
+        </div>
+        <span class="badge bg-success">{{ order.total | currency:'VND' }}</span>
+      </a>
+    </div>
+  
+    <div *ngIf="selectedOrder" class="card">
+      <div class="card-header">
+        <h5>Chi tiết đơn hàng #{{ selectedOrder.id }}</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Khách hàng:</strong> {{ selectedOrder.customer }}</p>
+        <p><strong>Địa chỉ:</strong> {{ selectedOrder.address }}</p>
+        <p><strong>Số điện thoại:</strong> {{ selectedOrder.phone }}</p>
+        <p><strong>Tổng tiền:</strong> {{ selectedOrder.total | currency:'VND' }}</p>
+        <p><strong>Trạng thái:</strong> {{ selectedOrder.status }}</p>
+  
+        <ul class="list-group mt-3">
+          <li 
+            *ngFor="let item of selectedOrder.items" 
+            class="list-group-item d-flex align-items-center">
+            <img 
+              [src]="item.product.image" 
+              alt="{{ item.product.name }}" 
+              width="50" height="50"
+              class="me-3 rounded" />
+            <div>
+              <div>{{ item.product.name }}</div>
+              <small>SL: {{ item.quantity }} - Giá: {{ item.product.price | currency:'VND' }}</small>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

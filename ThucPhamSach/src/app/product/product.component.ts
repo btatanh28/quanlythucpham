@@ -31,13 +31,28 @@ export class ProductComponent implements OnInit {
     this.sanPhamService.getSanPhams().subscribe({
       next: (data: SanPham[]) => {
         this.products = data;
-        this.filteredProducts = data;
+        this.filteredProducts = data.map((sp) => ({
+          ...sp,
+          trangThai: sp.SoTonKho === 0 ? 'Hết hàng' : 'Còn hàng'
+        }));
       },
       error: (error) => {
         console.error('Lỗi khi lấy sản phẩm:', error);
         alert('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
       }
     });
+    
+    // this.sanPhamService.getSanPhamById(id).subscribe({
+    //   next: (sp: SanPham) => {
+    //     if (sp.SoTonKho === 0) {
+    //       alert('Sản phẩm này đã hết hàng!');
+    //     }
+    //     console.log('Chi tiết sản phẩm:', sp);
+    //   },
+    //   error: (err) => {
+    //     console.error('Lỗi khi lấy sản phẩm:', err);
+    //   }
+    // });
   }
 
   onSearch(): void {
@@ -52,6 +67,26 @@ export class ProductComponent implements OnInit {
   }
 
   addToCart(product: SanPham): void {
-    this.cartService.addToCart(product);
+    if (!product.IDSanPham) {
+      alert('Không tìm thấy ID sản phẩm. Không thể thêm vào giỏ hàng.');
+      return;
+    }
+    
+    this.sanPhamService.kiemTraTonKho(product.IDSanPham).subscribe({
+      next: (tonKho) => {
+        if (tonKho === 0) {
+          alert('Sản phẩm này đã hết hàng!');
+          return;
+        }
+  
+        // Tiếp tục thêm vào giỏ hàng
+        this.cartService.addToCart(product);
+        console.log('Thêm vào giỏ hàng:', product);
+      },
+      error: (err) => {
+        console.error('Lỗi kiểm tra tồn kho:', err);
+        alert('Không thể kiểm tra tồn kho. Vui lòng thử lại.');
+      }
+    });
   }
 }

@@ -2,10 +2,16 @@ const db = require('../config/db');
 
 // Tạo đơn hàng
 exports.createDonHang = async (req, res) => {
-  const { TenKhachHang, TrangThaiSanPham, chiTiet } = req.body;
+  const { TenKhachHang, TrangThaiSanPham, HinhThucThanhToan, chiTiet } = req.body;
 
   if (!TenKhachHang || !Array.isArray(chiTiet) || chiTiet.length === 0) {
     return res.status(400).json({ message: 'Dữ liệu không hợp lệ' });
+  }
+
+  // Kiểm tra phương thức thanh toán
+  const validPaymentMethods = ['Thanh toán khi nhận hàng', 'Thanh toán chuyển khoản'];
+  if (HinhThucThanhToan && !validPaymentMethods.includes(HinhThucThanhToan)) {
+    return res.status(400).json({ message: 'Phương thức thanh toán không hợp lệ' });
   }
 
   const connection = await db.getConnection();
@@ -24,8 +30,8 @@ exports.createDonHang = async (req, res) => {
 
     // Tạo đơn hàng
     const [result] = await connection.execute(
-      `INSERT INTO DonHang (IDKhachHang, TongTien, TrangThaiSanPham) VALUES (?, ?, ?)`,
-      [users[0].IDKhachHang, tongTien, TrangThaiSanPham || 'Đang xử lý']
+      `INSERT INTO DonHang (IDKhachHang, TongTien, TrangThaiSanPham, HinhThucThanhToan) VALUES (?, ?, ?, ?)`,
+      [users[0].IDKhachHang, tongTien, TrangThaiSanPham || 'Đang xử lý', HinhThucThanhToan || 'Thanh toán khi nhận hàng']
     );
 
     const IDDonHang = result.insertId;
@@ -75,12 +81,15 @@ exports.getAllDonHang = async (req, res) => {
       SELECT 
         dh.IDDonHang AS id,
         kh.TenKhachHang AS customer,
+        kh.DiaChi AS address,
+        kh.SoDienThoai AS phone,
         dh.TongTien AS total,
         dh.TrangThaiSanPham AS status,
-        ct.IDSanPham,
+        dh.HinhThucThanhToan AS paymentMethod,
+        ct.IDSanPham AS productId,
         sp.TenSanPham AS productName,
-        ct.Quantity,
-        ct.Gia,
+        ct.Quantity AS quantity,
+        ct.Gia AS price,
         sp.HinhAnh AS image
       FROM DonHang dh
       JOIN KhachHang kh ON dh.IDKhachHang = kh.IDKhachHang
@@ -88,34 +97,41 @@ exports.getAllDonHang = async (req, res) => {
       LEFT JOIN SanPham sp ON ct.IDSanPham = sp.IDSanPham
     `);
 
-    const orders = [];
     const orderMap = new Map();
 
-    for (const row of rows) {
+    // Duyệt qua từng dòng dữ liệu và nhóm theo IDDonHang
+    rows.forEach(row => {
       if (!orderMap.has(row.id)) {
         orderMap.set(row.id, {
           id: row.id,
           customer: row.customer,
+          address: row.address,
+          phone: row.phone,
           total: row.total,
           status: row.status,
+          paymentMethod: row.paymentMethod || 'Chưa xác định',  // Thêm giá trị mặc định
           items: []
         });
       }
 
-      if (row.IDSanPham) {
+      // Nếu có sản phẩm trong đơn hàng, thêm vào danh sách sản phẩm
+      if (row.productId) {
         orderMap.get(row.id).items.push({
           product: {
-            id: row.IDSanPham,
+            id: row.productId,
             name: row.productName,
-            price: row.Gia,
-            image: row.image || 'default.jpg'
+            price: row.price,
+            image: row.image || 'default.jpg'  // Nếu không có hình ảnh, sử dụng hình ảnh mặc định
           },
-          quantity: row.Quantity
+          quantity: row.quantity
         });
       }
-    }
+    });
 
-    orders.push(...orderMap.values());
+    // Chuyển các đơn hàng vào mảng
+    const orders = Array.from(orderMap.values());
+
+    // Trả về kết quả
     res.json(orders);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách đơn hàng:', err);
@@ -123,22 +139,83 @@ exports.getAllDonHang = async (req, res) => {
   }
 };
 
+
+
 // Lấy chi tiết đơn hàng
 exports.getDonHangById = async (req, res) => {
   const { id } = req.params;
+
   try {
-    const [[order]] = await db.execute(`
+    // Kiểm tra nếu đường dẫn có chứa 'customer' → lấy theo IDKhachHang
+    if (req.originalUrl.includes('/customer/')) {
+      const [orders] = await db.execute(`
+        SELECT 
+          dh.IDDonHang AS id,
+          kh.TenKhachHang AS customer,
+          kh.DiaChi AS address,
+          kh.SoDienThoai AS phone,
+          dh.TongTien AS total,
+          dh.TrangThaiSanPham AS status
+        FROM DonHang dh
+        JOIN KhachHang kh ON dh.IDKhachHang = kh.IDKhachHang
+        WHERE kh.IDKhachHang = ?`
+      , [id]);
+
+      if (!orders.length) {
+        return res.status(404).json({ message: 'Không tìm thấy đơn hàng của khách hàng' });
+      }
+
+      // Lấy chi tiết sản phẩm cho từng đơn hàng
+      const result = await Promise.all(
+        orders.map(async (order) => {
+          const [details] = await db.execute(`
+            SELECT 
+              ct.IDSanPham,
+              sp.TenSanPham AS productName,
+              ct.Quantity,
+              ct.Gia,
+              sp.HinhAnh AS image
+            FROM CTDonHang ct
+            JOIN SanPham sp ON ct.IDSanPham = sp.IDSanPham
+            WHERE ct.IDDonHang = ?`
+          , [order.id]);
+
+          order.items = details.map(item => ({
+            product: {
+              id: item.IDSanPham,
+              name: item.productName,
+              price: item.Gia,
+              image: item.image || 'default.jpg'
+            },
+            quantity: item.Quantity
+          }));
+
+          return order;
+        })
+      );
+
+      return res.json(result);
+    }
+
+    // Ngược lại: lấy theo IDDonHang
+    const [orders] = await db.execute(`
       SELECT 
         dh.IDDonHang AS id,
         kh.TenKhachHang AS customer,
+        kh.DiaChi AS address,
+        kh.SoDienThoai AS phone,
         dh.TongTien AS total,
         dh.TrangThaiSanPham AS status
       FROM DonHang dh
       JOIN KhachHang kh ON dh.IDKhachHang = kh.IDKhachHang
-      WHERE dh.IDDonHang = ?
-    `, [id]);
+      WHERE dh.IDDonHang = ?`
+    , [id]);
 
-    if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    if (!orders.length) {
+      return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    }
+
+    const order = orders[0];
 
     const [details] = await db.execute(`
       SELECT 
@@ -149,8 +226,8 @@ exports.getDonHangById = async (req, res) => {
         sp.HinhAnh AS image
       FROM CTDonHang ct
       JOIN SanPham sp ON ct.IDSanPham = sp.IDSanPham
-      WHERE ct.IDDonHang = ?
-    `, [id]);
+      WHERE ct.IDDonHang = ?`
+    , [order.id]);
 
     order.items = details.map(item => ({
       product: {
@@ -164,10 +241,13 @@ exports.getDonHangById = async (req, res) => {
 
     res.json(order);
   } catch (err) {
-    console.error('Lỗi khi lấy chi tiết đơn hàng:', err);
-    res.status(500).json({ message: 'Lỗi khi lấy chi tiết đơn hàng', error: err.message });
+    console.error('Lỗi khi lấy đơn hàng:', err);
+    res.status(500).json({ message: 'Lỗi khi lấy đơn hàng', error: err.message });
   }
 };
+
+
+
 
 // Cập nhật trạng thái đơn hàng
 exports.updateTrangThai = async (req, res) => {
@@ -215,3 +295,5 @@ exports.deleteDonHang = async (req, res) => {
     connection.release();
   }
 };
+
+

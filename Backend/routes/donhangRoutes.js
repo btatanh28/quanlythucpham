@@ -4,8 +4,10 @@ const donHangController = require('../controllers/donhangController');
 
 router.post('/', donHangController.createDonHang);
 router.get('/', donHangController.getAllDonHang);
+router.get('/customer/:id', donHangController.getDonHangById);
 router.get('/:id', donHangController.getDonHangById);
 router.put('/:id/trangthai', donHangController.updateTrangThai);
 router.delete('/:id', donHangController.deleteDonHang);
+
 
 module.exports = router;
