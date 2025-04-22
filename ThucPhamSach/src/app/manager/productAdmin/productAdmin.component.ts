@@ -15,7 +15,7 @@ export class ProductAdminComponent implements OnInit {
     newProduct: SanPham = {
         TenSanPham: '',
         Gia: 0,
-        HinhAnh: '',
+        HinhAnh: 'assets/.jpg',
         SoTonKho: 0,
         MoTa: '',
         IDUser: null
@@ -111,7 +111,7 @@ export class ProductAdminComponent implements OnInit {
         this.newProduct = {
             TenSanPham: '',
             Gia: 0,
-            HinhAnh: '',
+            HinhAnh: 'assets/.jpg',
             SoTonKho: 0,
             MoTa: '',
             IDUser: null
