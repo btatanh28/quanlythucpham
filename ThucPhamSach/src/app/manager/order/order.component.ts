@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { OrderService } from '../../services/orderService';
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface CartItem {
@@ -21,7 +21,7 @@ interface Order {
 
 @Component({
   selector: 'app-admin-orders',
-  imports: [NgFor, NgIf, FormsModule],
+  imports: [NgFor, NgIf, FormsModule, CommonModule],
   templateUrl: './order.component.html',
   styleUrls: ['./order.component.css']
 })
