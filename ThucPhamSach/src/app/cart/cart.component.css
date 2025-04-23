@@ -1,6 +1,10 @@
 .cart-page {
     background-color: #f8f9fa;
   
+    /* .bg-modal{
+      padding: 200px 200px;
+    } */
+
     .card {
       border: none;
       border-radius: 10px;
